@@ -4,7 +4,7 @@ O backend da solução foi desenvolvido utilizando o framework fastapi, que é u
 
 ## Como rodar o backend
 
-Para rodar o backend, é necessário instalar as dependências do projeto. Para isso, vamos criar primeiramente um ambiente virtual e seguir os seguintes passos:
+Caso queira rodar o backend localmente, é necessário instalar as dependências do projeto. Para isso, vamos criar primeiramente um ambiente virtual e seguir os seguintes passos:
 
 1. Vá até a pasta do backend:
 ```bash

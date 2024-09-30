@@ -11,25 +11,28 @@ const PredictionForm = () => {
     const [mae, setMae] = useState(null);
     const [rmse, setRmse] = useState(null);
     const [epochs, setEpochs] = useState(20);
+    const [recomendation, setRecomendation] = useState(null);
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:8000/predict', {
+            const response = await axios.post(`http://${window.location.hostname}:3000/predict`, {
                 training_period: trainingPeriod,
                 prediction_days: predictionDays,
                 mse: mse,
                 mae: mae,
                 rmse: rmse,
                 epochs: epochs,
+                recomendation: recomendation
             });
             console.log(response.data);
             setGraph(response.data.graph);
             setMse(response.data.mse);
             setMae(response.data.mae);
             setRmse(response.data.rmse);
+            setRecomendation(response.data.recomendation);
         } catch (error) {
             console.error('Erro ao fazer a previsão:', error);
         } finally {
@@ -39,7 +42,7 @@ const PredictionForm = () => {
 
     useEffect(() => {
     try {
-        const response = axios.get('http://localhost:8000/');
+        const response = axios.get(`http://${window.location.hostname}:3000/`);
         console.log(response.data);
     } catch (error) {
         console.error('Erro ao fazer a previsão:', error);
@@ -92,11 +95,12 @@ const PredictionForm = () => {
             </form>
 
             {graph && <img src={graph} alt="Gráfico de previsão do Bitcoin" />}
-            { mse && mae && rmse &&
+            { mse && mae && rmse && recomendation &&
             <div>
                 <p>MAE: {mae}</p>
                 <p>MSE: {mse}</p>
                 <p>RMSE: {rmse}</p>
+                <p>Recomendação: {recomendation}</p>
             </div>}
         </div>
     );
