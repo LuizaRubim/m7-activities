@@ -20,7 +20,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite o frontend Next.js
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,7 +30,7 @@ url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
-# Função para preparar os dados e treinar o modelo LSTM
+
 def train_lstm(data, look_back=60, epochs=20):
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(data)
@@ -38,7 +38,7 @@ def train_lstm(data, look_back=60, epochs=20):
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(data)
 
-    # Separação treino e teste
+
     train_size = int(len(scaled_data) * 0.8)
     train_data = scaled_data[:train_size]
     test_data = scaled_data[train_size:]
@@ -85,7 +85,7 @@ def train_lstm(data, look_back=60, epochs=20):
 
     return model, scaler, mse, rmse, mae
 
-# Função para prever os valores futuros
+
 def predict_future(model, data, scaler, days_to_predict, look_back=60):
     last_data = data[-look_back:]
     scaled_last_data = scaler.transform(last_data)
@@ -109,32 +109,21 @@ async def predict(request: Request):
     prediction_days = int(body.get("prediction_days")) 
     epochs = int(body.get("epochs"))
 
-    # Puxar os dados históricos do Bitcoin
     btc_data = yf.download('BTC-USD', period=training_period)['Close'].values.reshape(-1, 1)
 
     if btc_data.size == 0:
         return {"error": "Nenhum dado disponível para o período solicitado."}
     
     history = btc_data.size
-
-    # Treinar o modelo
     model, scaler, mse, rmse, mae = train_lstm(btc_data, epochs)
-
-    # Prever os próximos valores
     predictions = predict_future(model, btc_data, scaler, prediction_days)
 
-    # Gerar gráfico
-    plt.figure(figsize=(10, 5))
-    
-    plt.plot(btc_data[-history:], label="Histórico BTC")
 
-    # A previsão começará após o último ponto de histórico
+    plt.figure(figsize=(10, 5))
+    plt.plot(btc_data[-history:], label="Histórico BTC")
     future_index = range(len(btc_data), len(btc_data) + prediction_days)
     plt.plot(future_index, predictions, label="Previsão BTC", color='red')
-
     plt.legend()
-
-    # Converter gráfico para base64
     img = BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
@@ -169,5 +158,8 @@ async def root():
 
 @app.get("/logs")
 async def logs():
-    logs = supabase.table("Logs").select("*").execute()
-    return logs.get("data", [])
+    response = supabase.table("Logs").select("*").execute()
+    logs = response.data
+    if not logs:
+        return {"error": "Nenhum log encontrado."}
+    return logs

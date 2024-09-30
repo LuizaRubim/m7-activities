@@ -3,6 +3,15 @@ import react from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "@/components/ui/table"
 
 
 export default function LogsPage() {
@@ -12,6 +21,7 @@ export default function LogsPage() {
         axios.get('http://localhost:8000/logs')
         .then((response) => {
             setData(response.data);
+            console.log(response.data);
         })
         .catch((error) => {
             alert('Erro ao buscar os logs:', error);
@@ -27,6 +37,24 @@ export default function LogsPage() {
                 Página inicial</Link>
             </nav>
             </header>
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead className="w-[100px]">Data</TableHead>
+                <TableHead>Ação</TableHead>
+                <TableHead>Resultado</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+            {data.map((log) => (
+                        <TableRow key={log.id}>
+                            <TableCell>{new Date(log.datetime).toLocaleString()}</TableCell>
+                            <TableCell>{log.acao}</TableCell>
+                            <TableCell>{JSON.stringify(log.resultado)}</TableCell>
+                        </TableRow>
+                    ))}
+            </TableBody>
+            </Table>
         </div>
     );
     }

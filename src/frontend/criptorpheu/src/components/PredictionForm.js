@@ -5,7 +5,7 @@ import axios from 'axios';
 const PredictionForm = () => {
     const [trainingPeriod, setTrainingPeriod] = useState('1y');
     const [predictionDays, setPredictionDays] = useState(30);
-    const [loading, setLoading] = useState(false); // Estado de carregamento
+    const [loading, setLoading] = useState(false);
     const [graph, setGraph] = useState(null);
     const [mse, setMse] = useState(null);
     const [mae, setMae] = useState(null);
@@ -33,7 +33,7 @@ const PredictionForm = () => {
         } catch (error) {
             console.error('Erro ao fazer a previsão:', error);
         } finally {
-            setLoading(false); // Desativa o estado de carregamento
+            setLoading(false);
         }
     };
 

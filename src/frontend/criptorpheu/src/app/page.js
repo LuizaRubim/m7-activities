@@ -1,4 +1,3 @@
-// "use client";
 import PredictionForm from '../components/PredictionForm';
 import Link from "next/link";
 
