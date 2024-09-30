@@ -1,6 +1,13 @@
 # Backend da solução
 
-O backend da solução foi desenvolvido utilizando o framework fastapi, que é um framework web assíncrono moderno, fácil de usar e rápido para Python, além de ter uma documentação ampla na internet. Como se tratava de uma aplicação simples, o fastapi foi uma otima ferraemnta para o desenvolvimento do backend.
+O backend da solução foi desenvolvido utilizando o framework fastapi, que é um framework web assíncrono moderno, fácil de usar e rápido para Python, além de ter uma documentação ampla na internet. Como se tratava de uma aplicação simples, o fastapi foi uma otima ferramenta para o desenvolvimento do backend.
+
+## Rotas
+
+O backend possui 3 rotas, sendo elas:
+    - /: rota que adiciona o log de acesso ao site no banco de dados
+    - /predict: rota que recebe os parâmetros para realizar a predição do preço do Bitcoin
+    - /logs: rota que retorna os logs 
 
 ## Como rodar o backend
 
