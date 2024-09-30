@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const PredictionForm = () => {
@@ -35,6 +35,15 @@ const PredictionForm = () => {
             setLoading(false); // Desativa o estado de carregamento
         }
     };
+
+    useEffect(() => {
+    try {
+        const response = axios.get('http://localhost:8000/');
+        console.log(response.data);
+    } catch (error) {
+        console.error('Erro ao fazer a previsão:', error);
+    }
+    }), [];
 
     return (
         <div className="flex flex-col items-center">

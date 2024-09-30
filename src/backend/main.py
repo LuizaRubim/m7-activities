@@ -11,16 +11,25 @@ from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
+from supabase import create_client, Client
+import os
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Permite o frontend Next.js
+    allow_origins=["*"],  # Permite o frontend Next.js
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+url: str = os.getenv("SUPABASE_URL")
+key: str = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
+
 # Função para preparar os dados e treinar o modelo LSTM
 def train_lstm(data, look_back=60):
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -130,3 +139,24 @@ async def predict(request: Request):
     graph_url = base64.b64encode(img.getvalue()).decode()
 
     return {"graph": f"data:image/png;base64,{graph_url}", "mse": mse, "rmse": rmse, "mae": mae}
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    response = await call_next(request)
+    log_entry = {
+        "datetime": pd.Timestamp.now().isoformat(),
+        "ação": str(request.url),
+        "resultado": response.status_code
+    }
+    supabase.table("Logs").insert(log_entry).execute()
+    return response
+
+@app.get("/")
+async def root():
+    log_entry = {
+        "datetime": pd.Timestamp.now().isoformat(),
+        "acao": "Usuário entrou na aplicação",
+        "resultado": {"status": "OK"}
+    }
+    supabase.table("Logs").insert(log_entry).execute()
+    return {"ação": "Usuário entrou na aplicação"}
