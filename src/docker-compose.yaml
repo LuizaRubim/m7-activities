@@ -1,0 +1,30 @@
+services:
+  frontend:
+    build: ./frontend/criptorpheu
+    image: src/frontend/criptorpheu
+    restart: unless-stopped
+    # environment:
+    #   NEXT_PUBLIC_BACKEND_URL: "http://backend:3000"
+    ports:
+      - "3002:3000"
+    container_name: criptorpheu-frontend
+    depends_on:
+      - backend
+    
+
+  backend:
+    build: ./backend
+    image: src/backend
+    restart: unless-stopped
+    # environment:
+    #   DATABASE_URL: ${DATABASE_URL}
+    ports:
+      - "3000:3000"
+    container_name: criptorpheu-backend
+    # env_file:
+    #   - .env
+    volumes:
+      - ./backend:/app/backend
+    environment:
+      - SUPABASE_URL=YOUR_SUPABASE_URL
+      - SUPABASE_KEY=YOUR_SUPABASE_KEY
