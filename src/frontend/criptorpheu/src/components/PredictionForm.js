@@ -37,11 +37,11 @@ const PredictionForm = () => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
+        <div className="flex flex-col items-center">
+            <form onSubmit={handleSubmit} className="flex flex-col items-center">
                 <label>
                     Período de Treinamento:
-                    <select value={trainingPeriod} onChange={(e) => setTrainingPeriod(e.target.value)}>
+                    <select value={trainingPeriod} onChange={(e) => setTrainingPeriod(e.target.value)} className="mb-4 p-2 border">
                         <option value="1mo">1 Mês</option>
                         <option value="3mo">3 Meses</option>
                         <option value="6mo">6 Meses</option>
@@ -57,11 +57,13 @@ const PredictionForm = () => {
                         onChange={(e) => setPredictionDays(e.target.value)}
                         min="1"
                         max="365"
+                        className="mb-4 p-2 border"
                     />
                 </label>
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Carregando...' : 'Fazer Previsão'}
+                <button type="submit" disabled={loading} className="bg-blue-500 text-white p-2">
+                    Fazer Previsão
                 </button>
+                {loading ? <p>Carregando...</p> : null}
             </form>
 
             {graph && <img src={graph} alt="Gráfico de previsão do Bitcoin" />}

@@ -1,25 +1,3 @@
-# import uvicorn
-# from fastapi import FastAPI
-
-# app = FastAPI ()
-
-# @app.get("/")
-# def read_root():
-#     # retorna quais são os tipos de cripto e um gráfico com os dados históricos 
-#     return {"Hello": "World"}
-
-# @app.get("/get_logs")
-# def read_logs():
-#     return {"logs": "logs"}
-
-# @app.post("/predict")
-# def predict():
-#     return {"predict": "predict"}
-
-
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="localhost", port=8000)
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sklearn.metrics import mean_absolute_error, mean_squared_error
@@ -79,7 +57,7 @@ def train_lstm(data, look_back=60):
     X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
     model = Sequential()
-    model.add(LSTM(units=50, return_sequences=True, iinput_shape=(time_step, 1)))
+    model.add(LSTM(units=50, return_sequences=True, input_shape=(time_step, 1)))
     model.add(LSTM(units=50))
     model.add(Dense(units=1))
     model.compile(optimizer='adam', loss='mean_squared_error')
