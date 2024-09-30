@@ -18,7 +18,7 @@ export default function LogsPage() {
     const [data, setData] = react.useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:8000/logs')
+        axios.get(`http://${window.location.hostname}:3000/logs`)
         .then((response) => {
             setData(response.data);
             console.log(response.data);
