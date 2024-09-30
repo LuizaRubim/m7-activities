@@ -10,12 +10,12 @@ const PredictionForm = () => {
     const [mse, setMse] = useState(null);
     const [mae, setMae] = useState(null);
     const [rmse, setRmse] = useState(null);
+    const [epochs, setEpochs] = useState(20);
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); // Ativa o estado de carregamento
-
+        setLoading(true);
         try {
             const response = await axios.post('http://localhost:8000/predict', {
                 training_period: trainingPeriod,
@@ -23,6 +23,7 @@ const PredictionForm = () => {
                 mse: mse,
                 mae: mae,
                 rmse: rmse,
+                epochs: epochs,
             });
             console.log(response.data);
             setGraph(response.data.graph);
@@ -56,7 +57,22 @@ const PredictionForm = () => {
                         <option value="6mo">6 Meses</option>
                         <option value="1y">1 Ano</option>
                         <option value="2y">2 Anos</option>
+                        <option value="3y">3 Anos</option>
+                        <option value="5y">5 Anos</option>
+                        <option value="ytd">Desde o inicio do ano</option>
+                        <option value="max">Tudo</option>
                     </select>
+                </label>
+                <label>
+                    Número de épocas:
+                    <input
+                        type="number"
+                        value={epochs}
+                        onChange={(e) => setEpochs(e.target.value)}
+                        min="1"
+                        max="1000"
+                        className="mb-4 p-2 border"
+                    />
                 </label>
                 <label>
                     Dias de Previsão:

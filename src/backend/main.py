@@ -31,7 +31,7 @@ key: str = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
 # Função para preparar os dados e treinar o modelo LSTM
-def train_lstm(data, look_back=60):
+def train_lstm(data, look_back=60, epochs=20):
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(data)
 
@@ -70,7 +70,7 @@ def train_lstm(data, look_back=60):
     model.add(LSTM(units=50))
     model.add(Dense(units=1))
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(X_train, y_train, epochs=20, batch_size=32)
+    model.fit(X_train, y_train, epochs=epochs, batch_size=32)
 
     test_predict = model.predict(X_test)
     test_predict = scaler.inverse_transform(test_predict)
@@ -105,26 +105,28 @@ def predict_future(model, data, scaler, days_to_predict, look_back=60):
 @app.post("/predict")
 async def predict(request: Request):
     body = await request.json()
-    training_period = body.get("training_period", "1y")
-    prediction_days = int(body.get("prediction_days", 30))  # Garantir que seja int
+    training_period = body.get("training_period")
+    prediction_days = int(body.get("prediction_days")) 
+    epochs = int(body.get("epochs"))
 
     # Puxar os dados históricos do Bitcoin
     btc_data = yf.download('BTC-USD', period=training_period)['Close'].values.reshape(-1, 1)
 
     if btc_data.size == 0:
         return {"error": "Nenhum dado disponível para o período solicitado."}
+    
+    history = btc_data.size
 
     # Treinar o modelo
-    model, scaler, mse, rmse, mae = train_lstm(btc_data)
+    model, scaler, mse, rmse, mae = train_lstm(btc_data, epochs)
 
     # Prever os próximos valores
     predictions = predict_future(model, btc_data, scaler, prediction_days)
 
     # Gerar gráfico
     plt.figure(figsize=(10, 5))
-
-    # Plotar o histórico dos últimos 365 dias
-    plt.plot(btc_data[-365:], label="Histórico BTC")
+    
+    plt.plot(btc_data[-history:], label="Histórico BTC")
 
     # A previsão começará após o último ponto de histórico
     future_index = range(len(btc_data), len(btc_data) + prediction_days)
@@ -138,18 +140,22 @@ async def predict(request: Request):
     img.seek(0)
     graph_url = base64.b64encode(img.getvalue()).decode()
 
-    return {"graph": f"data:image/png;base64,{graph_url}", "mse": mse, "rmse": rmse, "mae": mae}
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    response = await call_next(request)
     log_entry = {
         "datetime": pd.Timestamp.now().isoformat(),
-        "ação": str(request.url),
-        "resultado": response.status_code
+        "acao": "Usuário realizou uma predição",
+        "resultado": {
+            "periodo de treinamento": training_period,
+            "dias de previsão": prediction_days,
+            "épocas": epochs,
+            "modelo": "LSTM",
+            "mse": mse,
+            "rmse": rmse,
+            "mae": mae
+        }
     }
     supabase.table("Logs").insert(log_entry).execute()
-    return response
+
+    return {"graph": f"data:image/png;base64,{graph_url}", "mse": mse, "rmse": rmse, "mae": mae}
 
 @app.get("/")
 async def root():
@@ -159,4 +165,9 @@ async def root():
         "resultado": {"status": "OK"}
     }
     supabase.table("Logs").insert(log_entry).execute()
-    return {"ação": "Usuário entrou na aplicação"}
+    return {"acao": "Usuário entrou na aplicação"}
+
+@app.get("/logs")
+async def logs():
+    logs = supabase.table("Logs").select("*").execute()
+    return logs.get("data", [])
